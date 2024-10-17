@@ -1,9 +1,15 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+const authRoutes = require("./routes/authRoutes");
+const dotenv = require("dotenv");
+
+// Load variables from .env file
+require("dotenv").config({ path: ".env.local" });
 
 const port = process.env.PORT || 3000;
 const app = express();
 app.use(bodyParser.json());
+app.use("/api/auth", authRoutes);
 
 app.listen(port, () => {
   /* eslint-disable no-console */
