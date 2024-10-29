@@ -110,7 +110,60 @@ const login = async (req, res) => {
   }
 };
 
+const changePassword = async (req, res) => {
+  const { email, oldPassword, newPassword } = req.body;
+
+  if (!email || !oldPassword || !newPassword) {
+    return res.status(400).json({
+      statusCode: 400,
+      message: "Email, old password, and new password are required.",
+    });
+  }
+
+  try {
+    const userQuery = await getDoc(doc(db, "users", email));
+    if (!userQuery.exists()) {
+      return res.status(401).json({
+        statusCode: 401,
+        message: "User not found",
+      });
+    }
+
+    const userData = userQuery.data();
+    const isOldPasswordValid = await bcrypt.compare(
+      oldPassword,
+      userData.password
+    );
+
+    if (!isOldPasswordValid) {
+      return res.status(401).json({
+        statusCode: 401,
+        message: "Old password is invalid",
+      });
+    }
+
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
+    await setDoc(doc(db, "users", email), {
+      ...userData,
+      password: hashedNewPassword,
+    });
+
+    res.status(200).json({
+      statusCode: 200,
+      message: "Password changed successfully",
+    });
+  } catch (error) {
+    res.status(400).json({
+      statusCode: 400,
+      message: "Error changing password",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   register,
   login,
+  changePassword,
 };
