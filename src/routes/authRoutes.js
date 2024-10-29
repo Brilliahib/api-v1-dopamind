@@ -10,4 +10,6 @@ router.post("/register", authController.register);
 // Route untuk login user
 router.post("/login", authController.login);
 
+router.post("/change-password", authMiddleware, authController.changePassword);
+
 module.exports = router;
